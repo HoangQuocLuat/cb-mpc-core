@@ -86,3 +86,21 @@ func KeyCurveCode(key Mpc_ecdsa2pc_key_ref) (int, error) {
 	}
 	return code, nil
 }
+
+func SerializeECDSA2PKey(key Mpc_ecdsa2pc_key_ref) ([][]byte, error) {
+	var ser CMEMS
+	err := C.serialize_mpc_ecdsa2p_key((*C.mpc_ecdsa2pc_key_ref)(&key), &ser)
+	if err != 0 {
+		return nil, fmt.Errorf("serialize_mpc_ecdsa2p_key failed: %v", err)
+	}
+	return CMEMSGet(ser), nil
+}
+
+func DeserializeECDSA2PKey(ser [][]byte) (Mpc_ecdsa2pc_key_ref, error) {
+	var key Mpc_ecdsa2pc_key_ref
+	err := C.deserialize_mpc_ecdsa2p_key(cmems(ser), (*C.mpc_ecdsa2pc_key_ref)(&key))
+	if err != 0 {
+		return Mpc_ecdsa2pc_key_ref{}, fmt.Errorf("deserialize_mpc_ecdsa2p_key failed: %v", err)
+	}
+	return key, nil
+}

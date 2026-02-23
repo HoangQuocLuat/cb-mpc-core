@@ -111,3 +111,29 @@ int mpc_ecdsa2p_key_get_curve_code(mpc_ecdsa2pc_key_ref* key) {
   ecdsa2pc::key_t* k = static_cast<ecdsa2pc::key_t*>(key->opaque);
   return k->curve.get_openssl_code();
 }
+
+int serialize_mpc_ecdsa2p_key(mpc_ecdsa2pc_key_ref* k, cmems_t* ser) {
+  ecdsa2pc::key_t* key = static_cast<ecdsa2pc::key_t*>(k->opaque);
+  auto x_share = coinbase::ser(key->x_share);
+  auto Q = coinbase::ser(key->Q);
+  auto c_key = coinbase::ser(key->c_key);
+  auto curve = coinbase::ser(key->curve);
+  auto paillier = coinbase::ser(key->paillier);
+  auto role = coinbase::ser(key->role);
+  auto out = std::vector<mem_t>{x_share, Q, c_key, curve, paillier, role};
+  *ser = coinbase::ffi::copy_to_cmems(out);
+  return 0;
+}
+
+int deserialize_mpc_ecdsa2p_key(cmems_t sers, mpc_ecdsa2pc_key_ref* k) {
+  std::unique_ptr<ecdsa2pc::key_t> key(new ecdsa2pc::key_t());
+  std::vector<buf_t> sers_vec = coinbase::ffi::bufs_from_cmems(sers);
+  if (coinbase::deser(sers_vec[0], key->x_share)) return 1;
+  if (coinbase::deser(sers_vec[1], key->Q)) return 1;
+  if (coinbase::deser(sers_vec[2], key->c_key)) return 1;
+  if (coinbase::deser(sers_vec[3], key->curve)) return 1;
+  if (coinbase::deser(sers_vec[4], key->paillier)) return 1;
+  if (coinbase::deser(sers_vec[5], key->role)) return 1;
+  *k = mpc_ecdsa2pc_key_ref{key.release()};
+  return 0;
+}

@@ -45,6 +45,9 @@ cmem_t mpc_ecdsa2p_key_get_x_share(mpc_ecdsa2pc_key_ref* key);
 // A negative value indicates an error.
 int mpc_ecdsa2p_key_get_curve_code(mpc_ecdsa2pc_key_ref* key);
 
+int serialize_mpc_ecdsa2p_key(mpc_ecdsa2pc_key_ref* k, cmems_t* ser);
+int deserialize_mpc_ecdsa2p_key(cmems_t sers, mpc_ecdsa2pc_key_ref* k);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
