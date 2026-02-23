@@ -201,3 +201,15 @@ func ECDSA2PCRefresh(job2p *Job2P, req *ECDSA2PCRefreshRequest) (*ECDSA2PCRefres
 
 	return &ECDSA2PCRefreshResponse{NewKeyShare: ECDSA2PCKey(newKeyRef)}, nil
 }
+
+func (k ECDSA2PCKey) Serialize() ([][]byte, error) {
+	return cgobinding.SerializeECDSA2PKey(k.cgobindingRef())
+}
+
+func KeyFromBytes(data [][]byte) (ECDSA2PCKey, error) {
+	ref, err := cgobinding.DeserializeECDSA2PKey(data)
+	if err != nil {
+		return ECDSA2PCKey{}, err
+	}
+	return ECDSA2PCKey(ref), nil
+}
