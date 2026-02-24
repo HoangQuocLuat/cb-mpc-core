@@ -119,8 +119,9 @@ int serialize_mpc_ecdsa2p_key(mpc_ecdsa2pc_key_ref* k, cmems_t* ser) {
   auto c_key = coinbase::ser(key->c_key);
   auto curve = coinbase::ser(key->curve);
   auto paillier = coinbase::ser(key->paillier);
-  auto role = coinbase::ser(key->role);
-  auto out = std::vector<mem_t>{x_share, Q, c_key, curve, paillier, role};
+  int role = static_cast<int>(key->role);
+  auto role_buf = coinbase::ser(role);
+  auto out = std::vector<mem_t>{x_share, Q, c_key, curve, paillier, role_buf};
   *ser = coinbase::ffi::copy_to_cmems(out);
   return 0;
 }
@@ -133,7 +134,12 @@ int deserialize_mpc_ecdsa2p_key(cmems_t sers, mpc_ecdsa2pc_key_ref* k) {
   if (coinbase::deser(sers_vec[2], key->c_key)) return 1;
   if (coinbase::deser(sers_vec[3], key->curve)) return 1;
   if (coinbase::deser(sers_vec[4], key->paillier)) return 1;
-  if (coinbase::deser(sers_vec[5], key->role)) return 1;
+  
+  // Deserialize role
+  int role = 0;
+  if (coinbase::deser(sers_vec[5], role)) return 1;
+  key->role = static_cast<coinbase::mpc::party_t>(role);
+  
   *k = mpc_ecdsa2pc_key_ref{key.release()};
   return 0;
 }
